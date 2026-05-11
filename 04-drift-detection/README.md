@@ -6,7 +6,7 @@ Compare a **baseline** distribution against a **current production** distributio
 
 ```bash
 cd 04-drift-detection
-python3 scripts/drift_detect.py
+python scripts/drift_detect.py
 # Generates:
 #   reports/drift-report.html
 #   reports/drift-summary.json

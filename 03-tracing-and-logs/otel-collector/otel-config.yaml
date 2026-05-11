@@ -37,7 +37,7 @@ processors:
         latency: { threshold_ms: 2000 }
       - name: probabilistic-1pct
         type: probabilistic
-        probabilistic: { sampling_percentage: 1 }
+        probabilistic: { sampling_percentage: 100 }
 
   # Add deployment env to every span/metric resource attribute
   resource:
@@ -60,7 +60,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [tail_sampling, resource, batch]
+      processors: [resource, batch]
       exporters: [otlp/jaeger]
 
     metrics:

@@ -31,4 +31,4 @@ This:
 
 ## Submission checkpoint (5 pts)
 
-Run `python3 verify-docker.py` and commit its `setup-report.json` output to `submission/`.
+Run `python verify-docker.py` and commit its `setup-report.json` output to `submission/`.

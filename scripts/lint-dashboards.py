@@ -6,7 +6,7 @@ Checks:
   - Each panel has id, title, type, targets
   - Each target has a datasource (or refId at minimum)
 
-Run: python3 scripts/lint-dashboards.py path/to/*.json
+Run: python scripts/lint-dashboards.py path/to/*.json
 """
 from __future__ import annotations
 

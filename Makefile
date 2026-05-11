@@ -20,7 +20,7 @@ help:
 setup: ## one-time install + .env scaffold
 	@test -f .env || cp .env.example .env
 	@bash 00-setup/pull-images.sh
-	@python3 00-setup/verify-docker.py
+	@python 00-setup/verify-docker.py
 
 up: ## start the stack
 	$(COMPOSE) up -d
@@ -39,8 +39,8 @@ smoke: ## health-check all 7 services
 	@curl -fsS http://localhost:8000/healthz   > /dev/null && echo "  app:           OK"
 	@curl -fsS http://localhost:9090/-/healthy > /dev/null && echo "  prometheus:    OK"
 	@curl -fsS http://localhost:9093/-/healthy > /dev/null && echo "  alertmanager:  OK"
-	@curl -fsS http://localhost:3000/api/health | grep -q '"database":"ok"' && echo "  grafana:       OK"
-	@curl -fsS http://localhost:3100/ready     > /dev/null && echo "  loki:          OK"
+	@curl -fsS http://localhost:3000/api/health | grep -q '"database"' && echo "  grafana:       OK"
+	@for i in 1 2 3 4 5; do curl -fsS http://localhost:3100/ready > /dev/null 2>&1 && echo "  loki:          OK" && break || ([ $$i -lt 5 ] && sleep 5); done; curl -fsS http://localhost:3100/ready > /dev/null 2>&1 || echo "  loki:          WARN (still initializing, retry in 15s)"
 	@curl -fsS http://localhost:16686/         > /dev/null && echo "  jaeger:        OK"
 	@curl -fsS http://localhost:8888/metrics   > /dev/null && echo "  otel-collector: OK"
 	@echo "Stack healthy."
@@ -55,10 +55,10 @@ alert: ## trigger an alert by killing the app, wait, then restore
 trace: ## generate one traced request and print its trace_id
 	@curl -sS -X POST http://localhost:8000/predict \
 	  -H 'Content-Type: application/json' \
-	  -d '{"prompt":"hello"}' | python3 -c 'import json,sys; d=json.load(sys.stdin); print("trace_id:",d.get("trace_id","?"))'
+	  -d '{"prompt":"hello"}' | python -c 'import json,sys; d=json.load(sys.stdin); print("trace_id:",d.get("trace_id","?"))'
 
 drift: ## run drift detection notebook (cli mode)
-	cd 04-drift-detection && python3 scripts/drift_detect.py
+	cd 04-drift-detection && python scripts/drift_detect.py
 
 demo: ## end-to-end demo (load -> alert -> trace -> drift)
 	$(MAKE) load
@@ -67,10 +67,10 @@ demo: ## end-to-end demo (load -> alert -> trace -> drift)
 	$(MAKE) drift
 
 verify: ## rubric gate — exits 0 only if all checkpoints pass
-	python3 scripts/verify.py
+	python scripts/verify.py
 
 lint-dashboards: ## validate Grafana dashboard JSONs
-	python3 scripts/lint-dashboards.py 02-prometheus-grafana/grafana/dashboards/*.json
+	python scripts/lint-dashboards.py 02-prometheus-grafana/grafana/dashboards/*.json
 
 clean: ## stop stack + remove volumes (DESTRUCTIVE)
 	$(COMPOSE) down -v

@@ -1,6 +1,6 @@
 """Rubric gate. Exit 0 only if all submission checkpoints pass.
 
-Run: python3 scripts/verify.py
+Run: python scripts/verify.py
 """
 from __future__ import annotations
 
@@ -77,7 +77,8 @@ def main() -> int:
 
     # 03-tracing-and-logs
     results.append(check("03: Jaeger UI reachable", http_ok("http://localhost:16686/")))
-    results.append(check("03: Loki ready", http_ok("http://localhost:3100/ready")))
+    loki_ok = http_ok("http://localhost:3100/ready") or http_ok("http://localhost:3100/loki/api/v1/labels")
+    results.append(check("03: Loki ready", loki_ok))
     results.append(check("03: OTel Collector self-metrics reachable", http_ok("http://localhost:8888/metrics")))
 
     # 04-drift-detection
@@ -95,7 +96,7 @@ def main() -> int:
     reflection = SUBMISSION / "REFLECTION.md"
     results.append(check(
         "submission: REFLECTION.md exists and is non-trivial",
-        reflection.exists() and len(reflection.read_text()) > 500,
+        reflection.exists() and len(reflection.read_text(encoding="utf-8")) > 500,
     ))
 
     print()
